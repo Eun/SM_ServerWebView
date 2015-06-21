@@ -250,7 +250,7 @@ public BuildHTTPPlayerResponse()
 
 	while (clients < clientcount)
 	{
-		StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<tr class=\"team0\"><td></td><td>?</td></tr>");
+		StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<tr class=\"team0\"><td></td><td>?</td><td></td><td></td></tr>");
 		clients++;
 	}
 
