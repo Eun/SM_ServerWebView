@@ -1,7 +1,7 @@
 #include <sourcemod>
 #include <socket>
 
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 
 public Plugin:myinfo = {
 	name = "Server Web View",
@@ -224,11 +224,13 @@ public BuildPlayerList(String:buffer[], bufferSize, team)
 
 public BuildHTTPPlayerResponse()
 {
+
+	decl String:buffer[HTTPPlayerBufferSize];
 	decl String:hostname[80];
 	GetConVarString(FindConVar("hostname"), hostname, sizeof(hostname));
 
-	Format(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<html><head><meta charset=\"UTF-8\"><title>%s</title></head><body>", hostname);
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<style type=\"text/css\">body{width:50%;margin:auto}h1{text-align:center}h1,h3{padding:0;margin:0}h3 div{display:inline-block;width:50%}h3 div.slots{text-align:left}h3 div.slots{text-align:right}div.date{text-align:right}table{border-spacing:0;width:100%}tr{text-align:center}tr.spacer{padding: .5em 0 .5em 0}tr.team0,tr.team1{background:#c6c6c6}tr.team2{background:#ff3333}tr.team3{background:#3333ff}</style>");
+	Format(buffer, HTTPPlayerBufferSize, "<html><head><meta charset=\"UTF-8\"><title>%s</title></head><body>", hostname);
+	StrCat(buffer, HTTPPlayerBufferSize, "<style type=\"text/css\">body{width:50%;margin:auto}h1{text-align:center}h1,h3{padding:0;margin:0}h3 div{display:inline-block;width:50%}h3 div.slots{text-align:left}h3 div.slots{text-align:right}div.date{text-align:right}table{border-spacing:0;width:100%}tr{text-align:center}tr.spacer{padding: .5em 0 .5em 0}tr.team0,tr.team1{background:#c6c6c6}tr.team2{background:#ff3333}tr.team3{background:#3333ff}</style>");
 
 
 	decl String:header[128];
@@ -236,29 +238,29 @@ public BuildHTTPPlayerResponse()
 	GetCurrentMap(mapname, sizeof(mapname));
 	new clientcount = GetClientCount(false);
 	FormatEx(header, sizeof(header), "<h1>%s</h1><h3><div class=\"map\">%s</div><div class=\"slots\">%d/%d</div></h3>", hostname, mapname, clientcount, GetMaxHumanPlayers());
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, header);
+	StrCat(buffer, HTTPPlayerBufferSize, header);
 
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<table><th>#</th><th>Player</th><th>Frags</th><th>Time</th>");
+	StrCat(buffer, HTTPPlayerBufferSize, "<table><th>#</th><th>Player</th><th>Frags</th><th>Time</th>");
 
 	new clients = 0;
-	clients += BuildPlayerList(HTTPPlayerBuffer, HTTPPlayerBufferSize, 2);
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<tr class=\"spacer\"><td></td></tr>");
-	clients += BuildPlayerList(HTTPPlayerBuffer, HTTPPlayerBufferSize, 3);
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<tr class=\"spacer\"><td></td></tr>");
-	clients += BuildPlayerList(HTTPPlayerBuffer, HTTPPlayerBufferSize, 0);
+	clients += BuildPlayerList(buffer, HTTPPlayerBufferSize, 2);
+	StrCat(buffer, HTTPPlayerBufferSize, "<tr class=\"spacer\"><td></td></tr>");
+	clients += BuildPlayerList(buffer, HTTPPlayerBufferSize, 3);
+	StrCat(buffer, HTTPPlayerBufferSize, "<tr class=\"spacer\"><td></td></tr>");
+	clients += BuildPlayerList(buffer, HTTPPlayerBufferSize, 0);
 
 
 	while (clients < clientcount)
 	{
-		StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "<tr class=\"team0\"><td></td><td>?</td><td></td><td></td></tr>");
+		StrCat(buffer, HTTPPlayerBufferSize, "<tr class=\"team0\"><td></td><td>?</td><td></td><td></td></tr>");
 		clients++;
 	}
 
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "</table>")
+	StrCat(buffer, HTTPPlayerBufferSize, "</table>")
 
 	if (clients == 0)
 	{
-		StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, "No Players...");
+		StrCat(buffer, HTTPPlayerBufferSize, "No Players...");
 	}
 
 
@@ -266,7 +268,8 @@ public BuildHTTPPlayerResponse()
 	FormatTime(sFormattedTime, sizeof(sFormattedTime), "%m/%d/%Y - %H:%M:%S", GetTime());
 
 	FormatEx(header, sizeof(header), "</table><div class=\"date\">Updated on %s</div></body></html>", sFormattedTime);
-	StrCat(HTTPPlayerBuffer, HTTPPlayerBufferSize, header);
+	StrCat(buffer, HTTPPlayerBufferSize, header);
+	BuildHTTPResponse(HTTPPlayerBuffer, HTTPPlayerBufferSize, 200, buffer);
 }
 
 public BuildHTTPErrorResponse()
