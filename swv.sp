@@ -8,7 +8,7 @@ public Plugin:myinfo = {
 	author = "Eun",
 	description = "Provides an Webinterface for the server",
 	version = PLUGIN_VERSION,
-	url = "http://www.player.to/"
+	url = "https://github.com/Eun/SM_ServerWebView/"
 };
 
 new Handle:var_swv_port;
